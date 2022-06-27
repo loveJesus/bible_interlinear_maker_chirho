@@ -4,6 +4,7 @@ import argparse
 import os
 import re
 import sys
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from collections import defaultdict
 
@@ -23,10 +24,20 @@ def init_parser_chirho() -> argparse.ArgumentParser:
     return parser_chirho
 
 
+def init_jinja2_chirho():
+    env_chirho = Environment(
+        loader=FileSystemLoader("jinja2_chirho"),
+        autoescape=select_autoescape()
+    )
+    return env_chirho
+
+
 class BibleInterlinearMakerChirho:
     VERSE_LINE_RE_CHIRHO = re.compile(r'^(((\w|\s)+)\s(\d+):(\d+):)\s+(.+)$')
     VERSION_LINE_RE_CHIRHO = re.compile(r'^\(\w+\)$')
     STRONGS_RE_CHIRHO = re.compile(r'<([GgHh](\d+)?)>')
+
+    jinja2_env_chirho = init_jinja2_chirho()
 
     def __init__(self, key_chirho: str, ot_name_chirho: str, nt_name_chirho: str, is_old_testament_chirho: bool):
         self.key_chirho = key_chirho
@@ -149,34 +160,18 @@ class BibleInterlinearMakerChirho:
             if len(separated_item_chirho["new_chirho"]) == 0 and len(separated_item_chirho["original_chirho"]) == 0:
                 continue
             col_class_chirho = "col-md-6" if (len(separated_item_chirho["original_chirho"]) > 12 and not self.is_old_testament_chirho) else "col-md-3"
-            html_table_str_chirho += """
-                <div class="%s border">
-                    <div class="original_translation_words_chirho">%s</div>
-                    <div class="new_translation_words_chirho">%s</div>
-                </div>
-            """ % (col_class_chirho, separated_item_chirho["original_chirho"], " ".join(separated_item_chirho['new_chirho']))
+            html_table_str_chirho += self.jinja2_env_chirho.get_template("verse_wordblock_chirho.jinja2").render(
+                col_class_chirho=col_class_chirho,
+                original_chirho=separated_item_chirho["original_chirho"],
+                new_chirho=" ".join(separated_item_chirho["new_chirho"]))
 
         reverse_class_chirho = "flex-row-reverse" if self.is_old_testament_chirho else ""
 
-        return f"""
-            <div class="row verse_chirho mt-4 border shadow">
-                <div class="col-12">
-                    <div class="row verse_str_chirho">
-                        <div class="col-12">
-                            <h3>{verse_str_chirho}</h3>
-                        </div>
-                    </div>
-                    <div class="row {reverse_class_chirho} verse_table_chirho">
-                        {html_table_str_chirho}
-                    </div>
-                    <div class="row verse_nt_chirho my-5">
-                        <div class="col-12">
-                            <em>{verse_dict_item_chirho["new_chirho"]}</em>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            """
+        return self.jinja2_env_chirho.get_template('verse_chirho.jinja2').render(
+            verse_str_chirho=verse_str_chirho,
+            new_chirho=verse_dict_item_chirho["new_chirho"],
+            html_table_str_chirho=html_table_str_chirho,
+            reverse_class_chirho=reverse_class_chirho)
 
     def get_html_page_chirho(self, zipped_dict_chirho: dict = None):
         """Hallelujah handle example:
@@ -203,51 +198,11 @@ class BibleInterlinearMakerChirho:
             verses_html_str_chirho += self._verse_dict_item_to_html_str_chirho(
                 bible_verse_str_chirho, bible_verse_value_chirho)
 
-        html_content_chirho = f"""
-            <!DOCTYPE html>
-            <html>
-                <head>
-                    <meta charset="utf-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-                    <title>{zipped_dict_chirho["original_name_chirho"]} to {zipped_dict_chirho["new_name_chirho"]} Aleluya</title>
-                    <style>
-                        h3 {{
-                            text-align: center;
-                            font-size: 3.5rem;
-                            margin-top: 3.5rem;
-                        }}
-                        .verse_table_chirho {{
-                            font-size: 3rem;
-                        }}
-                
-                        .verse_nt_chirho {{
-                            font-size: 3rem;
-                        }}
+        html_content_chirho = self.jinja2_env_chirho.get_template("outermost_chirho.jinja2").render(
+            {"verses_html_str_chirho": verses_html_str_chirho,
+             "original_name_chirho": zipped_dict_chirho["original_name_chirho"],
+             "new_name_chirho": zipped_dict_chirho["new_name_chirho"]})
 
-                        .new_translation_words_chirho {{
-                            color: #335588;
-                            font-weight: 200;
-                            font-style: italic;
-                            font-size: 2rem;
-                        }}
-                        h1 {{
-                        background: black;
-                        color: white;
-                        text-align: center;
-                        font-size: 4.2rem; }}
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <div class="row my-4">
-                            <h1>{zipped_dict_chirho["original_name_chirho"]} to {zipped_dict_chirho["new_name_chirho"]} Aleluya</h1>
-                        </div>
-                        {verses_html_str_chirho}
-                    </div>
-                </body>
-            </html>
-            """
         print(html_content_chirho)
 
 
