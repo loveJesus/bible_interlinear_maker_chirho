@@ -51,19 +51,42 @@ class BibleInterlinearMakerChirho:
         return strongs_str_chirho[0].upper() + str(int(strongs_str_chirho[1:]))
 
     def _parse_bible_str_tokens_chirho(self, bible_str_chirho: str) -> list:
-        """Hallelujah, parse the bible string into a list of dicts with the strongs key tokens (words with Strongs concordance Hallelujah)."""
+        """
+        Hallelujah, parse the bible verse string into a list of
+        dicts for each word or group of words with their related strongs key tokens that follow them.
+        (words with Strongs concordance Hallelujah).
+        """
         bible_tokens_chirho = []
         bible_str_list_chirho = bible_str_chirho.split()
         word_grouping_list_chirho = []
         for token_chirho in bible_str_list_chirho:
+            # if token_chirho == "׃":
+            #     continue  # Ignore the hebrew ending colon at this point
             if strongs_match_chirho := self.STRONGS_RE_CHIRHO.match(token_chirho):
-                bible_tokens_chirho.append({
-                    "strongs_chirho": self._parse_strongs_to_common_chirho(
-                        strongs_match_chirho.group(1)),
-                    "words_chirho": word_grouping_list_chirho})
-                word_grouping_list_chirho = []
+                if not word_grouping_list_chirho:
+                    if len(bible_tokens_chirho) == 0:
+                        # If in here, we have a strongs number starting the verse
+                        bible_tokens_chirho.append({
+                            "strongs_chirho": [
+                                self._parse_strongs_to_common_chirho(strongs_match_chirho.group(1))],
+                            "words_chirho": []})
+                    else:
+                        # if we are here, there is more than one strongs number that identify the previous word grouping
+                        bible_tokens_chirho[-1]["strongs_chirho"].append(
+                            self._parse_strongs_to_common_chirho(strongs_match_chirho.group(1)))
+                else:
+                    bible_tokens_chirho.append({
+                        "strongs_chirho": [
+                            self._parse_strongs_to_common_chirho(strongs_match_chirho.group(1))],
+                        "words_chirho": word_grouping_list_chirho})
+                    word_grouping_list_chirho = []
             else:
                 word_grouping_list_chirho.append(token_chirho)
+        if word_grouping_list_chirho:
+            # Hanging words with no strongs number
+            bible_tokens_chirho.append({
+                "strongs_chirho": [],
+                "words_chirho": word_grouping_list_chirho})
         return bible_tokens_chirho
 
     def _parse_bible_str_dict_tokens_chirho(self, bible_str_dict_chirho: dict) -> dict:
@@ -74,6 +97,10 @@ class BibleInterlinearMakerChirho:
         return bible_dict_tokens_chirho
 
     def _parse_bible_str_chirho(self, bible_str_chirho: str) -> dict:
+        """
+        Hallelujah, prepare lines and strong numbers, ignore irrelevant lines and join together lines for each
+        verse and store the string into a dict that is keyed by the verse number. Return that dict.
+        """
         bible_dict_chirho = defaultdict(str)
         bible_str_chirho = bible_str_chirho.replace("<", " <").replace(">", "> ").split('\n')
         last_key_chirho = ""
@@ -98,15 +125,15 @@ class BibleInterlinearMakerChirho:
         """Hallelujah, separate original tokens, and place new tokens as close as possible to the original tokens"""
         new_copy_chirho = new_chirho.copy()
         separated_chirho = []
-        for original_word_chirho in original_chirho:
+        for original_token_chirho in original_chirho:
             token_chirho = {
-                "original_chirho": " ".join(original_word_chirho["words_chirho"]),
+                "original_chirho": " ".join(original_token_chirho["words_chirho"]),
                 "new_chirho": []}
-            current_strongs_chirho = original_word_chirho["strongs_chirho"]
+            current_strongs_set_chirho = set(original_token_chirho["strongs_chirho"])
             found_new_word_chirho = False
             found_idx_chirho = 0
             for new_idx_chirho, new_word_chirho in enumerate(new_copy_chirho):
-                if new_word_chirho["strongs_chirho"] == current_strongs_chirho:
+                if len(set(new_word_chirho["strongs_chirho"]) & current_strongs_set_chirho) > 0:
                     found_new_word_chirho = True
                     found_idx_chirho = new_idx_chirho
                     break
@@ -127,15 +154,16 @@ class BibleInterlinearMakerChirho:
         ol_keys_chirho = set(bible_dict_ol_tokens_chirho.keys())
         nl_keys_chirho = set(bible_dict_nl_tokens_chirho.keys())
         if ol_keys_chirho != nl_keys_chirho:
-            print("Keys do not match in NL and OL - exiting")
+            print("Keys do not match in NL and OL different verses in each translation - exiting")
             sys.exit(1)
 
-        for ol_key_chirho, ol_value_chirho in bible_dict_ol_tokens_chirho.items():
-            nl_value_chirho = bible_dict_nl_tokens_chirho[ol_key_chirho]
-            zipped_dict_chirho["verses_chirho"][ol_key_chirho] = {
-                "original_chirho": ol_value_chirho,
-                "new_chirho": " ".join([" ".join(nl_dict_chirho["words_chirho"]) for nl_dict_chirho in nl_value_chirho]),
-                "separated_chirho": self._separate_chirho(ol_value_chirho, nl_value_chirho)}
+        for ol_verse_key_chirho, ol_token_dict_chirho in bible_dict_ol_tokens_chirho.items():
+            nl_token_dict_chirho = bible_dict_nl_tokens_chirho[ol_verse_key_chirho]
+            zipped_dict_chirho["verses_chirho"][ol_verse_key_chirho] = {
+                "original_chirho": ol_token_dict_chirho,
+                "new_chirho": " ".join([
+                    " ".join(nl_dict_chirho["words_chirho"]) for nl_dict_chirho in nl_token_dict_chirho]),
+                "separated_chirho": self._separate_chirho(ol_token_dict_chirho, nl_token_dict_chirho)}
 
         return zipped_dict_chirho
 
@@ -152,7 +180,7 @@ class BibleInterlinearMakerChirho:
             self.ot_name_chirho, dict_ot_tokens_chirho, self.nt_name_chirho, dict_nt_tokens_chirho)
         return zipped_dict_chirho
 
-    def _verse_dict_item_to_dict_chirho(self, verse_str_chirho: str, verse_dict_item_chirho: dict) -> dict:
+    def _verse_dict_chirho(self, verse_str_chirho: str, verse_dict_item_chirho: dict) -> dict:
         """Hallelujah, Convert a separated dict item to an HTML string"""
         separated_dict_items_chirho = verse_dict_item_chirho["separated_chirho"]
         verse_tables_chirho = []
@@ -173,7 +201,7 @@ class BibleInterlinearMakerChirho:
             "verse_tables_chirho": verse_tables_chirho,
             "reverse_class_chirho": reverse_class_chirho}
 
-    def get_html_page_chirho(self, zipped_dict_chirho: dict = None):
+    def get_translation_dict_chirho(self, zipped_dict_chirho: dict = None):
         """Hallelujah handle example:
             {
                 "original_name_chirho": "WLC",
@@ -197,23 +225,12 @@ class BibleInterlinearMakerChirho:
 
         for bible_verse_str_chirho, bible_verse_value_chirho in zipped_dict_chirho["verses_chirho"].items():
             verses_chirho.append(
-                self._verse_dict_item_to_dict_chirho(bible_verse_str_chirho, bible_verse_value_chirho))
+                self._verse_dict_chirho(bible_verse_str_chirho, bible_verse_value_chirho))
 
         return {
              "verses_chirho": verses_chirho,
              "original_name_chirho": zipped_dict_chirho["original_name_chirho"],
              "new_name_chirho": zipped_dict_chirho["new_name_chirho"]}
-
-
-def handle_ot_chirho(ot_key_chirho: str) -> BibleInterlinearMakerChirho:
-    """Hallelujah, handle the OT bible"""
-    bible_multi_ref_make_chirho = BibleInterlinearMakerChirho(ot_key_chirho, "OSHB", "SpaRV1909", True)
-    return bible_multi_ref_make_chirho
-
-
-def handle_nt_chirho(nt_key_chirho: str) -> BibleInterlinearMakerChirho:
-    bible_multi_ref_make_chirho = BibleInterlinearMakerChirho(nt_key_chirho, "TR", "SpaRV1909", False)
-    return bible_multi_ref_make_chirho
 
 
 def main_chirho() -> None:
@@ -230,12 +247,12 @@ def main_chirho() -> None:
     translations_chirho = []
 
     if ot_key_chirho:
-        ot_multi_ref_chirho = handle_ot_chirho(ot_key_chirho)
-        translations_chirho.append(ot_multi_ref_chirho.get_html_page_chirho())
+        ot_multi_ref_chirho = BibleInterlinearMakerChirho(ot_key_chirho, "OSHB", "SpaRV1909", True)
+        translations_chirho.append(ot_multi_ref_chirho.get_translation_dict_chirho())
 
     if nt_key_chirho:
-        nt_multi_ref_chirho = handle_nt_chirho(nt_key_chirho)
-        translations_chirho.append(nt_multi_ref_chirho.get_html_page_chirho())
+        nt_multi_ref_chirho = BibleInterlinearMakerChirho(nt_key_chirho, "TR", "SpaRV1909", False)
+        translations_chirho.append(nt_multi_ref_chirho.get_translation_dict_chirho())
 
     jinja2_env_chirho = init_jinja2_chirho()
     html_content_chirho = jinja2_env_chirho.get_template("outermost_chirho.jinja2").render(
