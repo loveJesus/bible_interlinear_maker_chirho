@@ -152,26 +152,26 @@ class BibleInterlinearMakerChirho:
             self.ot_name_chirho, dict_ot_tokens_chirho, self.nt_name_chirho, dict_nt_tokens_chirho)
         return zipped_dict_chirho
 
-    def _verse_dict_item_to_html_str_chirho(self, verse_str_chirho: str, verse_dict_item_chirho: dict) -> str:
+    def _verse_dict_item_to_dict_chirho(self, verse_str_chirho: str, verse_dict_item_chirho: dict) -> dict:
         """Hallelujah, Convert a separated dict item to an HTML string"""
         separated_dict_items_chirho = verse_dict_item_chirho["separated_chirho"]
-        html_table_str_chirho = ""
+        verse_tables_chirho = []
         for separated_item_chirho in separated_dict_items_chirho:
             if len(separated_item_chirho["new_chirho"]) == 0 and len(separated_item_chirho["original_chirho"]) == 0:
                 continue
             col_class_chirho = "col-md-6" if (len(separated_item_chirho["original_chirho"]) > 12 and not self.is_old_testament_chirho) else "col-md-3"
-            html_table_str_chirho += self.jinja2_env_chirho.get_template("verse_wordblock_chirho.jinja2").render(
-                col_class_chirho=col_class_chirho,
-                original_chirho=separated_item_chirho["original_chirho"],
-                new_chirho=" ".join(separated_item_chirho["new_chirho"]))
+            verse_tables_chirho.append({
+                "col_class_chirho": col_class_chirho,
+                "original_chirho": separated_item_chirho["original_chirho"],
+                "new_chirho": " ".join(separated_item_chirho["new_chirho"])})
 
         reverse_class_chirho = "flex-row-reverse" if self.is_old_testament_chirho else ""
 
-        return self.jinja2_env_chirho.get_template('verse_chirho.jinja2').render(
-            verse_str_chirho=verse_str_chirho,
-            new_chirho=verse_dict_item_chirho["new_chirho"],
-            html_table_str_chirho=html_table_str_chirho,
-            reverse_class_chirho=reverse_class_chirho)
+        return {
+            "verse_str_chirho": verse_str_chirho,
+            "new_chirho": verse_dict_item_chirho["new_chirho"],
+            "verse_tables_chirho": verse_tables_chirho,
+            "reverse_class_chirho": reverse_class_chirho}
 
     def get_html_page_chirho(self, zipped_dict_chirho: dict = None):
         """Hallelujah handle example:
@@ -193,17 +193,16 @@ class BibleInterlinearMakerChirho:
             }
         """
         zipped_dict_chirho = zipped_dict_chirho or self.zipped_dict_chirho
-        verses_html_str_chirho = ""
+        verses_chirho = []
+
         for bible_verse_str_chirho, bible_verse_value_chirho in zipped_dict_chirho["verses_chirho"].items():
-            verses_html_str_chirho += self._verse_dict_item_to_html_str_chirho(
-                bible_verse_str_chirho, bible_verse_value_chirho)
+            verses_chirho.append(
+                self._verse_dict_item_to_dict_chirho(bible_verse_str_chirho, bible_verse_value_chirho))
 
-        html_content_chirho = self.jinja2_env_chirho.get_template("outermost_chirho.jinja2").render(
-            {"verses_html_str_chirho": verses_html_str_chirho,
+        return {
+             "verses_chirho": verses_chirho,
              "original_name_chirho": zipped_dict_chirho["original_name_chirho"],
-             "new_name_chirho": zipped_dict_chirho["new_name_chirho"]})
-
-        print(html_content_chirho)
+             "new_name_chirho": zipped_dict_chirho["new_name_chirho"]}
 
 
 def handle_ot_chirho(ot_key_chirho: str) -> BibleInterlinearMakerChirho:
@@ -228,13 +227,21 @@ def main_chirho() -> None:
         print("God is good - No keys provided, run with -h to see help")
         sys.exit(1)
 
+    translations_chirho = []
+
     if ot_key_chirho:
         ot_multi_ref_chirho = handle_ot_chirho(ot_key_chirho)
-        ot_multi_ref_chirho.get_html_page_chirho()
+        translations_chirho.append(ot_multi_ref_chirho.get_html_page_chirho())
 
     if nt_key_chirho:
         nt_multi_ref_chirho = handle_nt_chirho(nt_key_chirho)
-        nt_multi_ref_chirho.get_html_page_chirho()
+        translations_chirho.append(nt_multi_ref_chirho.get_html_page_chirho())
+
+    jinja2_env_chirho = init_jinja2_chirho()
+    html_content_chirho = jinja2_env_chirho.get_template("outermost_chirho.jinja2").render(
+        translations_chirho=translations_chirho)
+
+    print(html_content_chirho)
 
 
 if __name__ == "__main__":

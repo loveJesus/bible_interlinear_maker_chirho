@@ -39,10 +39,9 @@
 </head>
 <body>
 <div class="container">
-    <div class="row my-4">
-        <h1>{{ original_name_chirho }} to {{ new_name_chirho }} Aleluya</h1>
-    </div>
-    {{ verses_html_str_chirho }}
+    {% for translation_chirho in translations_chirho %}
+        {% include "translation_chirho.jinja2" %}
+    {% endfor %}
 </div>
 </body>
 </html>

@@ -3,15 +3,17 @@
     <div class="col-12">
         <div class="row verse_str_chirho">
             <div class="col-12">
-                <h3>{{ verse_str_chirho }}</h3>
+                <h3>{{ verse_chirho.verse_str_chirho }}</h3>
             </div>
         </div>
-        <div class="row {{ reverse_class_chirho }} verse_table_chirho">
-            {{ html_table_str_chirho }}
+        <div class="row {{ verse_chirho.reverse_class_chirho }} verse_table_chirho">
+            {% for verse_table_chirho in verse_chirho.verse_tables_chirho %}
+                {% include "verse_wordblock_chirho.jinja2" %}
+            {% endfor %}
         </div>
         <div class="row verse_nt_chirho my-5">
             <div class="col-12">
-                <em>{{ new_chirho }}</em>
+                <em>{{ verse_chirho.new_chirho }}</em>
             </div>
         </div>
     </div>

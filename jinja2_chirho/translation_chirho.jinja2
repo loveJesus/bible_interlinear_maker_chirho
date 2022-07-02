@@ -1,0 +1,7 @@
+{# For God so loved the world, that He gave His only begotten Son, that all who believe in Him should not perish but have everlasting life #}
+<div class="row my-4">
+    <h1>{{ translation_chirho.original_name_chirho }} to {{ translation_chirho.new_name_chirho }} Aleluya</h1>
+</div>
+{% for verse_chirho in translation_chirho.verses_chirho %}
+    {% include "verse_chirho.jinja2" %}
+{% endfor %}
