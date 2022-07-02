@@ -7,7 +7,7 @@
             </div>
         </div>
         <div class="row {{ verse_chirho.reverse_class_chirho }} verse_table_chirho">
-            {% for verse_table_chirho in verse_chirho.verse_tables_chirho %}
+            {% for table_idx_chirho, verse_table_chirho in enumerate(verse_chirho.verse_tables_chirho) %}
                 {% include "verse_wordblock_chirho.jinja2" %}
             {% endfor %}
         </div>

@@ -1,5 +1,11 @@
 {# For God so loved the world, that He gave His only begotten Son, that all who believe in Him should not perish but have everlasting life #}
-<div class="{{ verse_table_chirho.col_class_chirho }} border">
-    <div class="original_translation_words_chirho">{{ verse_table_chirho.original_chirho }}</div>
-    <div class="new_translation_words_chirho">{{ verse_table_chirho.new_chirho }}</div>
-</div>
+{% with table_id_chirho="translation_%s_verse_%s_table_%s_chirho" % (
+        translation_idx_chirho, verse_idx_chirho, table_idx_chirho) %}
+    <script>window.verse_table_ids_chirho.push('{{table_id_chirho}}')</script>
+    <div class="{{ verse_table_chirho.col_class_chirho }} verse_table_chirho border"
+         id="{{ table_id_chirho }}"
+         onclick="verse_table_select_chirho('{{ table_id_chirho }}');">
+        <div class="original_translation_words_chirho">{{ verse_table_chirho.original_chirho }}</div>
+        <div class="new_translation_words_chirho">{{ verse_table_chirho.new_chirho }}</div>
+    </div>
+{% endwith %}

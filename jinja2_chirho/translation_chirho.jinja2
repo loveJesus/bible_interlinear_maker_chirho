@@ -2,6 +2,6 @@
 <div class="row my-4">
     <h1>{{ translation_chirho.original_name_chirho }} to {{ translation_chirho.new_name_chirho }} Aleluya</h1>
 </div>
-{% for verse_chirho in translation_chirho.verses_chirho %}
+{% for verse_idx_chirho, verse_chirho in enumerate(translation_chirho.verses_chirho) %}
     {% include "verse_chirho.jinja2" %}
 {% endfor %}

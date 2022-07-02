@@ -35,13 +35,94 @@
             text-align: center;
             font-size: 4.2rem;
         }
+        .verse_table_chirho {
+            cursor: pointer;
+        }
+        .verse_table_chirho.selected_chirho {
+            background: #335588;
+            color: white;
+        }
+        .verse_table_chirho.selected_chirho .new_translation_words_chirho {
+            color: white;
+        }
     </style>
 </head>
 <body>
+<script>
+    window.verse_table_ids_chirho = [];
+    window.selected_table_id_chirho = null;
+</script>
 <div class="container">
-    {% for translation_chirho in translations_chirho %}
+    {% for translation_idx_chirho, translation_chirho in enumerate(translations_chirho) %}
         {% include "translation_chirho.jinja2" %}
     {% endfor %}
 </div>
+<script>
+    document.onkeydown = checkKey_chirho;
+
+    function checkKey_chirho(e_chirho) {
+        //thank you Jesus for ketan @ https://stackoverflow.com/a/9310900/16126689
+        // and for Tim Down @ https://stackoverflow.com/a/3208034 
+        e_chirho = e_chirho || window.event;
+
+        if (e_chirho.keyCode == '38') {
+            select_previous_verse_table_chirho()
+            return false;
+            // up arrow
+        }
+        else if (e_chirho.keyCode == '40') {
+            select_next_verse_table_chirho();
+            return false;
+
+            // down arrow
+        }
+        else if (e_chirho.keyCode == '37') {
+            //select_next_verse_table_chirho();
+           // left arrow
+        }
+        else if (e_chirho.keyCode == '39') {
+            //select_previous_verse_table_chirho()
+           // right arrow
+        }
+    }
+
+    function select_next_verse_table_chirho() {
+        if(window.selected_table_id_chirho != null) {
+            let next_table_id_chirho = window.verse_table_ids_chirho[window.verse_table_ids_chirho.indexOf(window.selected_table_id_chirho) + 1];
+            if(next_table_id_chirho != null) {
+                verse_table_select_chirho(next_table_id_chirho);
+            }
+        }
+
+    }
+
+    function select_previous_verse_table_chirho() {
+        if(window.selected_table_id_chirho != null ){
+            let previous_table_id_chirho = window.verse_table_ids_chirho[window.verse_table_ids_chirho.indexOf(window.selected_table_id_chirho) - 1];
+            if(previous_table_id_chirho != null) {
+                verse_table_select_chirho(previous_table_id_chirho);
+            }
+        }
+
+    }
+
+    function verse_table_select_chirho(verse_table_id_chirho) {
+        let verse_tables_chirho = document.getElementsByClassName('verse_table_chirho');
+        for (let i_chirho = 0; i_chirho < verse_tables_chirho.length; i_chirho++) {
+            verse_tables_chirho[i_chirho].classList.remove('selected_chirho');
+        }
+        let verse_table_chirho = document.getElementById(verse_table_id_chirho);
+        //verse_table_chirho.scrollIntoView(true);
+        setTimeout(function() {
+            window.scrollTo(0, verse_table_chirho.offsetTop - 300);
+
+        }, 50);
+        console.log(verse_table_chirho.offsetTop);
+
+        verse_table_chirho.classList.toggle("selected_chirho");
+        window.selected_table_id_chirho = verse_table_id_chirho;
+    }
+
+</script>
 </body>
 </html>

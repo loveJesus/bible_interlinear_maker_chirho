@@ -239,6 +239,7 @@ def main_chirho() -> None:
 
     jinja2_env_chirho = init_jinja2_chirho()
     html_content_chirho = jinja2_env_chirho.get_template("outermost_chirho.jinja2").render(
+        enumerate=enumerate,
         translations_chirho=translations_chirho)
 
     print(html_content_chirho)
