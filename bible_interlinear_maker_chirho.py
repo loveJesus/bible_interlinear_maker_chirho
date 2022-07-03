@@ -125,9 +125,12 @@ class BibleInterlinearMakerChirho:
         """Hallelujah, separate original tokens, and place new tokens as close as possible to the original tokens"""
         new_copy_chirho = new_chirho.copy()
         separated_chirho = []
+        old_translation_token_list_chirho = []
+
         for original_token_chirho in original_chirho:
+            old_translation_token_list_chirho.append(" ".join(original_token_chirho["words_chirho"]))
             token_chirho = {
-                "original_chirho": " ".join(original_token_chirho["words_chirho"]),
+                "original_chirho": " ".join(old_translation_token_list_chirho),
                 "new_chirho": []}
             current_strongs_set_chirho = set(original_token_chirho["strongs_chirho"])
             found_new_word_chirho = False
@@ -140,7 +143,12 @@ class BibleInterlinearMakerChirho:
             if found_new_word_chirho:
                 words_chirho = new_copy_chirho.pop(found_idx_chirho)["words_chirho"]
                 token_chirho["new_chirho"] = words_chirho
-            separated_chirho.append(token_chirho)
+                separated_chirho.append(token_chirho)
+                old_translation_token_list_chirho = []
+        if old_translation_token_list_chirho:
+            separated_chirho.append({
+                "original_chirho": " ".join(old_translation_token_list_chirho),
+                "new_chirho": []})
         return separated_chirho
 
     def _zip_bible_dict_tokens_chirho(
@@ -187,7 +195,13 @@ class BibleInterlinearMakerChirho:
         for separated_item_chirho in separated_dict_items_chirho:
             if len(separated_item_chirho["new_chirho"]) == 0 and len(separated_item_chirho["original_chirho"]) == 0:
                 continue
-            col_class_chirho = "col-md-6" if (len(separated_item_chirho["original_chirho"]) > 12 and not self.is_old_testament_chirho) else "col-md-3"
+            col3_letters_chirho = 12 if not self.is_old_testament_chirho else 25
+            col_class_chirho = (
+                "col-md-9"
+                if (len(separated_item_chirho["original_chirho"]) / col3_letters_chirho) >= 2
+                else "col-md-6"
+                if (len(separated_item_chirho["original_chirho"]) / col3_letters_chirho) >= 1
+                else "col-md-3")
             verse_tables_chirho.append({
                 "col_class_chirho": col_class_chirho,
                 "original_chirho": separated_item_chirho["original_chirho"],
