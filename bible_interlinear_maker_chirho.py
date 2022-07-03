@@ -5,7 +5,7 @@ import os
 import re
 import sys
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-
+from icecream import ic
 from collections import defaultdict
 
 
@@ -14,7 +14,7 @@ def init_parser_chirho() -> argparse.ArgumentParser:
         usage="%(prog)s [options]",
         description='A tool to link a Bible Verse translations. Writes to STDOUT. '
                     'Currently requires diatheke to be installed from libsword, along '
-                    'with the OSHB, TR and SpaRV1909 modules.',)
+                    'with the OSHB, TR and SpaRV1909 modules.', )
     parser_chirho.add_argument(
         '-v', '--version', action='version', version='%(prog)s 0.1')
     parser_chirho.add_argument(
@@ -122,10 +122,43 @@ class BibleInterlinearMakerChirho:
         return bible_dict_chirho
 
     def _separate_chirho(self, original_chirho: list, new_chirho: list) -> list:
-        """Hallelujah, separate original tokens, and place new tokens as close as possible to the original tokens"""
+        """
+        Hallelujah, separate original tokens, and place new tokens as close as possible to the original tokens
+        """
         new_copy_chirho = new_chirho.copy()
         separated_chirho = []
         old_translation_token_list_chirho = []
+
+        def _clean_new_translation_chirho(new_copy_chirho: list) -> list:
+            """
+            Hallelujah, clean the new translation tokens that have no appearance in the old
+            """
+            final_copy_chirho = []
+            join_token_indexes_chirho = []
+            hold_new_words_chirho = []
+            original_copy_chirho = original_chirho.copy()
+            for new_token_idx_chirho, new_token_chirho in enumerate(new_copy_chirho):
+                found_new_word_chirho = False
+                found_original_idx_chirho = 0
+                for original_idx_chirho, old_token_chirho in enumerate(original_copy_chirho):
+                    if len(set(new_token_chirho["strongs_chirho"]) & set(old_token_chirho["strongs_chirho"])) > 0:
+                        found_new_word_chirho = True
+                        found_original_idx_chirho = original_idx_chirho
+                        break
+                if not found_new_word_chirho:
+                    join_token_indexes_chirho.append(new_token_idx_chirho)
+                    hold_new_words_chirho += new_token_chirho["words_chirho"]
+                else:
+                    token_copy_chirho = new_token_chirho.copy()
+                    token_copy_chirho["words_chirho"] = hold_new_words_chirho + new_token_chirho["words_chirho"]
+                    final_copy_chirho.append(token_copy_chirho)
+                    del original_copy_chirho[found_original_idx_chirho]
+                    hold_new_words_chirho = []
+
+            return final_copy_chirho
+
+
+        new_copy_chirho = _clean_new_translation_chirho(new_copy_chirho)
 
         for original_token_chirho in original_chirho:
             old_translation_token_list_chirho.append(" ".join(original_token_chirho["words_chirho"]))
@@ -196,6 +229,7 @@ class BibleInterlinearMakerChirho:
             if len(separated_item_chirho["new_chirho"]) == 0 and len(separated_item_chirho["original_chirho"]) == 0:
                 continue
             col3_letters_chirho = 12 if not self.is_old_testament_chirho else 25
+            # We want to attempt to make the holding boxes longer if the old translation is too long
             col_class_chirho = (
                 "col-md-9"
                 if (len(separated_item_chirho["original_chirho"]) / col3_letters_chirho) >= 2
@@ -242,9 +276,9 @@ class BibleInterlinearMakerChirho:
                 self._verse_dict_chirho(bible_verse_str_chirho, bible_verse_value_chirho))
 
         return {
-             "verses_chirho": verses_chirho,
-             "original_name_chirho": zipped_dict_chirho["original_name_chirho"],
-             "new_name_chirho": zipped_dict_chirho["new_name_chirho"]}
+            "verses_chirho": verses_chirho,
+            "original_name_chirho": zipped_dict_chirho["original_name_chirho"],
+            "new_name_chirho": zipped_dict_chirho["new_name_chirho"]}
 
 
 def main_chirho() -> None:
