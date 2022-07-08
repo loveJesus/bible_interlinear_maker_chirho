@@ -33,3 +33,8 @@ options:
                         New Testament key
 ```
 
+```shell
+# Handling chapters with different verse numberings (found so far: Genesis 32, 
+# this example also does Genesis 33 after which is the same numbering in Hebrew and Other translations)
+./bible_interlinear_maker_chirho.py -o "Genesis31:56-31:87 Genesis33"
+```

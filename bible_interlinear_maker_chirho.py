@@ -89,10 +89,31 @@ class BibleInterlinearMakerChirho:
                 "words_chirho": word_grouping_list_chirho})
         return bible_tokens_chirho
 
-    def _parse_bible_str_dict_tokens_chirho(self, bible_str_dict_chirho: dict) -> dict:
-        """Hallelujah, parse the bible string dict tokens (words with Strongs concordance Hallelujah)."""
+    def _parse_bible_str_dict_tokens_chirho(self, bible_str_dict_chirho: dict, is_ot_chirho: bool) -> dict:
+        """Hallelujah, parse the bible string dict tokens (words with Strongs concordance Hallelujah).
+        :param bible_str_dict_chirho: dict of bible verses with their strings
+        :param is_ot_chirho: is this the ancient/old language translation?
+        :return: dictionary of verses with their list of tokens
+        """
+        def rekey_chirho(key_chirho):
+            """
+            Hallelujah - rekey verses depending upon translation to current verses language:
+            - OT hebrew genesis 32:1-33 = reina valera etc 31:55-32:32
+            example: ./bible_interlinear_maker_chirho.py -o "Genesis31:56-31:87 Genesis33"
+            """
+            if is_ot_chirho:
+                book_chirho, verse_ref_chirho = key_chirho.split(' ')
+                # print("rekey_chirho:", verse_ref_chirho, file=sys.stderr)  # DEBUG aleluya
+                chapter_chirho, verse_chirho = map(int, verse_ref_chirho.split(':')[:2])
+                if book_chirho == 'Genesis':
+                    if chapter_chirho == 32:
+                        if verse_chirho == 1:
+                            return 'Genesis 31:55:'
+                        return f'Genesis 32:{verse_chirho - 1}:'
+            return key_chirho
+
         bible_dict_tokens_chirho = {
-            key_chirho: self._parse_bible_str_tokens_chirho(str_chirho)
+            rekey_chirho(key_chirho): self._parse_bible_str_tokens_chirho(str_chirho)
             for key_chirho, str_chirho in bible_str_dict_chirho.items()}
         return bible_dict_tokens_chirho
 
@@ -195,7 +216,9 @@ class BibleInterlinearMakerChirho:
         ol_keys_chirho = set(bible_dict_ol_tokens_chirho.keys())
         nl_keys_chirho = set(bible_dict_nl_tokens_chirho.keys())
         if ol_keys_chirho != nl_keys_chirho:
+            print(nl_keys_chirho - ol_keys_chirho)
             print("Keys do not match in NL and OL different verses in each translation - exiting")
+
             sys.exit(1)
 
         for ol_verse_key_chirho, ol_token_dict_chirho in bible_dict_ol_tokens_chirho.items():
@@ -215,8 +238,8 @@ class BibleInterlinearMakerChirho:
             f'diatheke -b {self.nt_name_chirho} -f plain -o vcan -k {self.key_chirho}').read()
         dict_ot_chirho = self._parse_bible_str_chirho(diatheke_ot_chirho)
         dict_nt_chirho = self._parse_bible_str_chirho(diatheke_nt_chirho)
-        dict_ot_tokens_chirho = self._parse_bible_str_dict_tokens_chirho(dict_ot_chirho)
-        dict_nt_tokens_chirho = self._parse_bible_str_dict_tokens_chirho(dict_nt_chirho)
+        dict_ot_tokens_chirho = self._parse_bible_str_dict_tokens_chirho(dict_ot_chirho, is_ot_chirho=True)
+        dict_nt_tokens_chirho = self._parse_bible_str_dict_tokens_chirho(dict_nt_chirho, is_ot_chirho=False)
         zipped_dict_chirho = self._zip_bible_dict_tokens_chirho(
             self.ot_name_chirho, dict_ot_tokens_chirho, self.nt_name_chirho, dict_nt_tokens_chirho)
         return zipped_dict_chirho
