@@ -35,15 +35,77 @@
             text-align: center;
             font-size: 4.2rem;
         }
+
         .verse_table_chirho {
             cursor: pointer;
         }
+
         .verse_table_chirho.selected_chirho {
             background: #335588;
             color: white;
         }
+
         .verse_table_chirho.selected_chirho .new_translation_words_chirho {
             color: white;
+        }
+    </style>
+    <style>
+        .language_characters_chirho span {
+            display: inline-block;
+            padding: 0;
+            margin: .1rem;
+            text-align: center;
+        }
+
+        .language_characters_chirho div {
+            background: white;
+            width: 15.4rem;
+        }
+
+        .language_characters_chirho div div {
+            padding: 0;
+            margin: 0;
+        }
+
+        .language_characters_hebrew_chirho span {
+            line-height: 2.87rem;
+        }
+
+        .language_characters_hebrew_chirho div {
+            height: 2.8rem;
+        }
+
+        .language_characters_greek_chirho div {
+            height: 2.6rem;
+        }
+
+        span.hebrew_letter_chirho {
+            font-size: 2.6rem;
+            width: 4.6rem;
+            margin-left: 2rem;
+            text-align: center;
+        }
+
+        span.greek_letter_chirho {
+            font-size: 2.4rem;
+            width: 4.6rem;
+            margin-left: 2rem;
+            text-align: center;
+        }
+
+        span.sound_chirho {
+            font-size: 2.1rem;
+            width: 3.2rem;
+            margin-left: .4rem;
+
+            color: #335;
+        }
+
+        .letter_name_chirho {
+            font-size: 1.2rem;
+            line-height: 2.8rem;
+            font-style: italic;
+            color: #456;
         }
     </style>
 </head>
@@ -52,11 +114,10 @@
     window.verse_table_ids_chirho = [];
     window.selected_table_id_chirho = null;
 </script>
-<div class="container">
-    {% for translation_idx_chirho, translation_chirho in enumerate(translations_chirho) %}
-        {% include "translation_chirho.jinja2" %}
-    {% endfor %}
-</div>
+{% for translation_idx_chirho, translation_chirho in enumerate(translations_chirho) %}
+    {% include "translation_chirho.jinja2" %}
+{% endfor %}
+
 <script>
     document.onkeydown = checkKey_chirho;
 
@@ -69,27 +130,24 @@
             select_previous_verse_table_chirho()
             return false;
             // up arrow
-        }
-        else if (e_chirho.keyCode == '40') {
+        } else if (e_chirho.keyCode == '40') {
             select_next_verse_table_chirho();
             return false;
 
             // down arrow
-        }
-        else if (e_chirho.keyCode == '37') {
+        } else if (e_chirho.keyCode == '37') {
             //select_next_verse_table_chirho();
-           // left arrow
-        }
-        else if (e_chirho.keyCode == '39') {
+            // left arrow
+        } else if (e_chirho.keyCode == '39') {
             //select_previous_verse_table_chirho()
-           // right arrow
+            // right arrow
         }
     }
 
     function select_next_verse_table_chirho() {
-        if(window.selected_table_id_chirho != null) {
+        if (window.selected_table_id_chirho != null) {
             let next_table_id_chirho = window.verse_table_ids_chirho[window.verse_table_ids_chirho.indexOf(window.selected_table_id_chirho) + 1];
-            if(next_table_id_chirho != null) {
+            if (next_table_id_chirho != null) {
                 verse_table_select_chirho(next_table_id_chirho);
             }
         }
@@ -97,9 +155,9 @@
     }
 
     function select_previous_verse_table_chirho() {
-        if(window.selected_table_id_chirho != null ){
+        if (window.selected_table_id_chirho != null) {
             let previous_table_id_chirho = window.verse_table_ids_chirho[window.verse_table_ids_chirho.indexOf(window.selected_table_id_chirho) - 1];
-            if(previous_table_id_chirho != null) {
+            if (previous_table_id_chirho != null) {
                 verse_table_select_chirho(previous_table_id_chirho);
             }
         }
@@ -113,7 +171,7 @@
         }
         let verse_table_chirho = document.getElementById(verse_table_id_chirho);
         //verse_table_chirho.scrollIntoView(true);
-        setTimeout(function() {
+        setTimeout(function () {
             window.scrollTo(0, verse_table_chirho.offsetTop - 300);
 
         }, 50);

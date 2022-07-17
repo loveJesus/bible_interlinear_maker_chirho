@@ -5,7 +5,6 @@ import os
 import re
 import sys
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from icecream import ic
 from collections import defaultdict
 
 
@@ -175,7 +174,8 @@ class BibleInterlinearMakerChirho:
                     final_copy_chirho.append(token_copy_chirho)
                     del original_copy_chirho[found_original_idx_chirho]
                     hold_new_words_chirho = []
-
+            if hold_new_words_chirho and final_copy_chirho:
+                final_copy_chirho[-1]["words_chirho"] += hold_new_words_chirho
             return final_copy_chirho
 
 
@@ -218,7 +218,6 @@ class BibleInterlinearMakerChirho:
         if ol_keys_chirho != nl_keys_chirho:
             print(nl_keys_chirho - ol_keys_chirho)
             print("Keys do not match in NL and OL different verses in each translation - exiting")
-
             sys.exit(1)
 
         for ol_verse_key_chirho, ol_token_dict_chirho in bible_dict_ol_tokens_chirho.items():
@@ -300,6 +299,7 @@ class BibleInterlinearMakerChirho:
 
         return {
             "verses_chirho": verses_chirho,
+            "is_old_testament_chirho": self.is_old_testament_chirho,
             "original_name_chirho": zipped_dict_chirho["original_name_chirho"],
             "new_name_chirho": zipped_dict_chirho["new_name_chirho"]}
 

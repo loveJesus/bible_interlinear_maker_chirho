@@ -1,7 +1,24 @@
 {# For God so loved the world, that He gave His only begotten Son, that all who believe in Him should not perish but have everlasting life #}
-<div class="row my-4">
-    <h1>{{ translation_chirho.original_name_chirho }} to {{ translation_chirho.new_name_chirho }} Aleluya</h1>
+
+
+<div style="position: relative">
+
+    <div class="language_characters_chirho"
+         style="top:-1.2rem; height: 0; position: sticky; position: -webkit-sticky; font-size: 3rem;">
+        {% if translation_chirho.is_old_testament_chirho %}
+            {% include "language_characters_hebrew_chirho.jinja2" %}
+        {% else %}
+            {% include "language_characters_greek_chirho.jinja2" %}
+        {% endif %}
+
+    </div>
+    <div class="container">
+        <div class="row my-4">
+            <h1>{{ translation_chirho.original_name_chirho }} to {{ translation_chirho.new_name_chirho }} Aleluya</h1>
+        </div>
+        {% for verse_idx_chirho, verse_chirho in enumerate(translation_chirho.verses_chirho) %}
+            {% include "verse_chirho.jinja2" %}
+        {% endfor %}
+    </div>
+
 </div>
-{% for verse_idx_chirho, verse_chirho in enumerate(translation_chirho.verses_chirho) %}
-    {% include "verse_chirho.jinja2" %}
-{% endfor %}
