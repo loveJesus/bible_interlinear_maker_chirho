@@ -109,6 +109,12 @@ class BibleInterlinearMakerChirho:
                         if verse_chirho == 1:
                             return 'Genesis 31:55:'
                         return f'Genesis 32:{verse_chirho - 1}:'
+                if book_chirho == "Exodus":
+                    if chapter_chirho == 7:
+                        if verse_chirho > 25:
+                            return f'Exodus 8:{verse_chirho-25}:'
+                    if chapter_chirho == 8:
+                        return f'Exodus 8:{verse_chirho+4}:'
             return key_chirho
 
         bible_dict_tokens_chirho = {
@@ -177,7 +183,6 @@ class BibleInterlinearMakerChirho:
             if hold_new_words_chirho and final_copy_chirho:
                 final_copy_chirho[-1]["words_chirho"] += hold_new_words_chirho
             return final_copy_chirho
-
 
         new_copy_chirho = _clean_new_translation_chirho(new_copy_chirho)
 
