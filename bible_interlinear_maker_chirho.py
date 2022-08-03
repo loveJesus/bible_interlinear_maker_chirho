@@ -115,6 +115,11 @@ class BibleInterlinearMakerChirho:
                             return f'Exodus 8:{verse_chirho-25}:'
                     if chapter_chirho == 8:
                         return f'Exodus 8:{verse_chirho+4}:'
+                    if chapter_chirho == 21:
+                        if verse_chirho == 37:
+                            return f'Exodus 22:1:'
+                    if chapter_chirho == 22:
+                        return f"Exodus 22:{verse_chirho+1}:"
             return key_chirho
 
         bible_dict_tokens_chirho = {
